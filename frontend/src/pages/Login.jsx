@@ -8,7 +8,8 @@ import { useState } from "react";
 import logo     from '../assets/logo.png';
 import truckLogo from '../assets/truck.png';
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL || "https://proyecto-srr.onrender.com";
+//const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 function Login() {
   const navigate = useNavigate();
