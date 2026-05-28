@@ -13,7 +13,7 @@ function Tracking() {
 	filter === "Todos"
     ? orders
     : orders.filter(
-        (order) => order.status === filter
+        (order) => order.estado === filter
 	);
 
 	const getBadgeClass = (status) => {
@@ -100,7 +100,7 @@ function Tracking() {
 						<circle cx="12" cy="12" r="10"></circle>
 					</svg>
 					<div>
-						<h6>Pepito Pérez</h6>
+						<h6>{JSON.parse(localStorage.getItem("user") || "{}").nombre || "Usuario"}</h6>
 					</div>
 				</div>
 
@@ -175,15 +175,15 @@ function Tracking() {
 							{filteredOrders.map((order) => (
 								<tr key={order.id}>
 									<td>#{order.id}</td>
-									<td>{order.origin}</td>
-									<td>{order.destination}</td>
+									<td>{order.origen}</td>
+									<td>{order.destino}</td>
 									<td>
-										<span className={`badge-status ${getBadgeClass(order.status)}`}>
-											{order.status}
+										<span className={`badge-status ${getBadgeClass(order.estado)}`}>
+											{order.estado}
 										</span>
 									</td>
-									<td>{order.client}</td>
-									<td>26/04/2026 09:00</td>
+									<td>{order.cliente}</td>
+									<td>{order.creadoEn ? new Date(order.creadoEn).toLocaleDateString("es-CO") : "-"}</td>
 									<td>
 										<div className="actions-icons">
 											<i className="bi bi-eye"></i>

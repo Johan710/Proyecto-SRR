@@ -1,0 +1,26 @@
+# ============================================================
+#  render.yaml  –  Configuración de despliegue en Render
+#  Docs: https://render.com/docs/blueprint-spec
+# ============================================================
+
+services:
+  - type: web
+    name: sspr-backend
+    runtime: node
+    region: oregon          # oregon | frankfurt | singapore | ohio
+    plan: free              # free | starter | standard
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    healthCheckPath: /
+
+    envVars:
+      # ⚠️  NUNCA pongas el valor real aquí; úsalo como referencia
+      # En el dashboard de Render: Settings → Environment → Add
+      - key: JWT_SECRET
+        sync: false         # Render pedirá el valor manualmente
+      - key: JWT_EXPIRES_IN
+        value: 2h
+      - key: FRONTEND_URL
+        sync: false         # Pon la URL de tu frontend en Netlify/Vercel
+      - key: NODE_ENV
+        value: production

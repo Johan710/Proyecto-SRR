@@ -1,6 +1,21 @@
-node_modules
-dist
+# Dependencias
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# Variables de entorno (¡NUNCA subir al repo!)
 .env
-.vscode
-target
-.idea
+frontend/.env
+backend/.env
+
+# Build
+frontend/dist/
+frontend/.vite/
+
+# Logs
+npm-debug.log*
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

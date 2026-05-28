@@ -1,4 +1,12 @@
 {
+  "name": "sspr-proyecto",
+  "version": "1.0.0",
+  "description": "Sistema de Seguimiento de Pedidos y Rutas",
+  "scripts": {
+    "backend": "cd backend && npm install && npm run dev",
+    "frontend": "cd frontend && npm install && npm run dev",
+    "install:all": "cd backend && npm install && cd ../frontend && npm install"
+  },
   "dependencies": {
     "bootstrap": "^5.3.8"
   }

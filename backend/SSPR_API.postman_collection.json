@@ -1,0 +1,337 @@
+{
+  "info": {
+    "_postman_id": "sspr-api-collection-v1",
+    "name": "SSPR – API Backend",
+    "description": "Colección completa de rutas del Sistema de Seguimiento de Pedidos y Rutas.\n\n**Flujo de uso:**\n1. Ejecuta **Login** → copia el `token` de la respuesta\n2. En la colección, ve a *Variables* y pega el token en `jwt_token`\n3. Todas las demás solicitudes lo usan automáticamente",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000", "type": "string" },
+    { "key": "jwt_token", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "Login (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const r = pm.response.json();",
+                  "if (r.token) {",
+                  "  pm.collectionVariables.set('jwt_token', r.token);",
+                  "  console.log('Token guardado automáticamente');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@sspr.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "description": "Autentica un usuario y devuelve un JWT.\n\n**Credenciales de prueba:**\n- admin@sspr.com / admin123\n- supervisor@sspr.com / super123\n- conductor@sspr.com / conductor123"
+          },
+          "response": []
+        },
+        {
+          "name": "Login – validación fallida",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"no-es-email\",\n  \"password\": \"123\"\n}"
+            },
+            "description": "Prueba que el servidor rechace datos inválidos → debe responder 400"
+          },
+          "response": []
+        },
+        {
+          "name": "Login – credenciales incorrectas",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@sspr.com\",\n  \"password\": \"wrongpassword\"\n}"
+            },
+            "description": "Debe responder 401"
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/auth/me",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/auth/me",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
+            "description": "Devuelve los datos del usuario autenticado"
+          },
+          "response": []
+        },
+        {
+          "name": "Sin token → 401",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/auth/me",
+            "description": "Verifica que rutas protegidas rechacen requests sin token → 401"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📦 Pedidos",
+      "item": [
+        {
+          "name": "GET todos los pedidos",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/orders",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
+            "description": "Lista todos los pedidos. Filtro opcional: `/api/orders?estado=Pendiente`"
+          },
+          "response": []
+        },
+        {
+          "name": "GET pedidos filtrados por estado",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/orders?estado=En tránsito",
+              "query": [{ "key": "estado", "value": "En tránsito" }]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }]
+          },
+          "response": []
+        },
+        {
+          "name": "GET pedido por ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/orders/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }]
+          },
+          "response": []
+        },
+        {
+          "name": "POST crear pedido",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/orders",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"origen\": \"Bogotá\",\n  \"destino\": \"Cartagena\",\n  \"cliente\": \"Luis Martínez\",\n  \"descripcion\": \"Electrodomésticos de cocina\",\n  \"estado\": \"Pendiente\"\n}"
+            },
+            "description": "Crea un nuevo pedido. Todos los campos son obligatorios."
+          },
+          "response": []
+        },
+        {
+          "name": "POST crear pedido – validación fallida",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/orders",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"origen\": \"\",\n  \"destino\": \"\",\n  \"cliente\": \"X\",\n  \"descripcion\": \"ok\"\n}"
+            },
+            "description": "Campos vacíos y descripción muy corta → debe responder 400 con detalle de errores"
+          },
+          "response": []
+        },
+        {
+          "name": "POST origen = destino → error",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/orders",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"origen\": \"Bogotá\",\n  \"destino\": \"Bogotá\",\n  \"cliente\": \"Test\",\n  \"descripcion\": \"Mismo origen y destino\"\n}"
+            },
+            "description": "Validación custom: origen ≠ destino → 400"
+          },
+          "response": []
+        },
+        {
+          "name": "PUT actualizar pedido",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/api/orders/1",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"origen\": \"Bogotá\",\n  \"destino\": \"Medellín\",\n  \"cliente\": \"Carlos Pérez Actualizado\",\n  \"descripcion\": \"Paquete electrónico - actualizado\",\n  \"estado\": \"En tránsito\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH cambiar estado",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/api/orders/1/estado",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"Entregado\"\n}"
+            },
+            "description": "Actualiza solo el estado del pedido"
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH estado inválido → 400",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/api/orders/1/estado",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"EstadoInventado\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE pedido (solo admin)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/orders/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
+            "description": "Solo el rol 'admin' puede eliminar pedidos. Loguearse con admin@sspr.com primero."
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE sin permiso → 403",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/orders/2",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
+            "description": "Loguearse con conductor@sspr.com y luego intentar eliminar → 403"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🚚 Repartidores",
+      "item": [
+        {
+          "name": "GET todos los repartidores",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/repartidores",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }]
+          },
+          "response": []
+        },
+        {
+          "name": "GET repartidor por ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/repartidores/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }]
+          },
+          "response": []
+        },
+        {
+          "name": "POST crear repartidor",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/repartidores",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Roberto Sánchez\",\n  \"telefono\": \"3157894561\",\n  \"placa\": \"DEF-789\",\n  \"estado\": \"Disponible\"\n}"
+            },
+            "description": "Requiere rol admin o supervisor"
+          },
+          "response": []
+        },
+        {
+          "name": "POST repartidor – datos inválidos",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/repartidores",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"X\",\n  \"telefono\": \"abc\",\n  \"placa\": \"123\"\n}"
+            },
+            "description": "Placa, teléfono y nombre con formato incorrecto → 400"
+          },
+          "response": []
+        },
+        {
+          "name": "PUT actualizar repartidor",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/api/repartidores/1",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Juan Rodríguez Actualizado\",\n  \"telefono\": \"3001234567\",\n  \"placa\": \"ABC-123\",\n  \"estado\": \"En ruta\"\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🏥 Health Check",
+      "item": [
+        {
+          "name": "GET / (servidor activo)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/",
+            "description": "Verifica que el servidor esté respondiendo. Útil para Render/Railway."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

@@ -101,7 +101,7 @@ function Rute() {
 						<circle cx="12" cy="12" r="10"></circle>
 					</svg>
 					<div>
-						<h6>Pepito Pérez</h6>
+						<h6>{JSON.parse(localStorage.getItem("user") || "{}").nombre || "Usuario"}</h6>
 					</div>
 				</div>
 
